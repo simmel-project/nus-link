@@ -26,6 +26,19 @@ static uint16_t lrck_duty_cycles[PWM0_CH_NUM] = {32};
 #define SINGLE_POWER (0)
 #define POWER_LEVEL DOUBLE_POWER
 
+/*
+Entries in the wave tables have the format of:
+
+  PWM0 transition, PWM1 transition, [unused], total count
+
+These are fetched in-order by the PWM sequencing engine. Once
+the table is exhausted, an interrupt is fired and the PWM
+engine is pointed at the next table, based upon the next bit's
+value.
+
+Note that the PWM clock is 4MHz, and 4MHz/192 = 20833.333Hz, 
+which is the carrier frequency of the BPSK modulation.
+ */
 #if 0 // sharper transition
 static uint16_t mod_duty_cycles_same[4*16] = {
 					 96, POWER_LEVEL, 0, 192,
@@ -384,7 +397,7 @@ void PWM1_IRQHandler(void) {
 	
 	pwm->TASKS_SEQSTART[0] = 1;
 	
-	if( (samplecount % (62500 / 3 * 3)) == 1 ) {
+	if( (samplecount % (62500 / 3 * 3)) == 1 ) { // delay modulator start by one second
 	  mod_instance.run = 1;
 	}
 #endif

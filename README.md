@@ -118,8 +118,12 @@ varies depending upon the character.
 
 ## Implementation
 
-Please refer to the `demodulator` and `modulator` README files for
-their respective in-depth descriptions of their implementation.
+Please refer to the `demodulator`
+(https://github.com/simmel-project/nus-link/tree/master/demodulator)
+and `modulator`
+(https://github.com/simmel-project/nus-link/tree/master/modulator)
+README files for their respective in-depth descriptions of their
+implementation.
 
 # Prerequisites
 The Simmel development system assumes you already have an Rpi with the
