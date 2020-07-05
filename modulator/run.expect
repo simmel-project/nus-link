@@ -1,0 +1,8 @@
+spawn telnet localhost 4444
+expect "Open On-Chip Debugger"
+
+send "reset\r"
+expect ">"
+
+send "exit\r"
+expect eof
