@@ -10,11 +10,25 @@ The Simmel development system assumes you already have an Rpi with the
 appropriate adapter installed, and openocd compiled with BCM2835
 support.
 
-In order to start the openocd service, you will need to clone
-the Simmel Scripts
-(https://github.com/simmel-project/simmel-scripts.git) repository, and
-run the `swd` script within. The README in the Simmel Scripts repo
-will guide you through this.
+In order to start the openocd service, you will need to clone the
+Simmel Scripts (https://github.com/simmel-project/simmel-scripts.git)
+repository. Run the `swd` script within. The README in the Simmel
+Scripts repo will guide you through this.
+
+Note that the directory structure *must* be as follows:
+
+```
+----|
+    +-- simmel-scripts/
+    +-- nus-link/
+```
+
+In other words, `simmel-scripts` and `nus-link` should be cloned into
+the same directory level as each other. This is because `openocd` runs
+with a path relative to the directory it was started in (which is
+`simmel-scripts`), but the code you wan to load is in `nus-link`, and
+therefore the convenience scripts go up one directory and down into
+`nus-link` to find the `_build` directory.
 
 You will also need to follow the directions within the
 `simmel-scripts` repo to load the nrf52 "softdevice" firmware before
