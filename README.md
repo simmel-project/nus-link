@@ -26,6 +26,7 @@ Therefore, please regard the remainder of this README as breadcrumbs
 for anyone who is looking for an open source reference design for a
 near-ultrasound free-space link.
 
+![demodulator block diagram](https://raw.githubusercontent.com/simmel-project/nus-link/master/simmel_demodulator.png)
 
 ## Link structure
 
@@ -125,7 +126,18 @@ and `modulator`
 README files for their respective in-depth descriptions of their
 implementation.
 
-![demodulator block diagram](https://raw.githubusercontent.com/simmel-project/nus-link/master/simmel_demodulator.png)
+# Performance
+
+Below is an example of the demodulated data plus incoming data, measured under the following conditions:
+
+* Modulator pointed directly at demodulator, 1 meter distance
+* Music playing, measured at 50dB at demodulator device
+
+![performance screen shot](https://raw.githubusercontent.com/simmel-project/nus-link/master/demodulator/examples/simmel_demod_data_1meter_with_50dB_background_music.png)
+
+The top trace is the demodulated data, and the bottom trace is the raw incoming samples, but normalized
+to be viewable (without normalization, you would just see a flat line because the incoming amplitude is
+actually quite small).
 
 # Prerequisites
 The Simmel development system assumes you already have an Rpi with the
