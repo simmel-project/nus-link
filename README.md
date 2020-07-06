@@ -125,6 +125,8 @@ and `modulator`
 README files for their respective in-depth descriptions of their
 implementation.
 
+![demodulator block diagram](https://raw.githubusercontent.com/simmel-project/nus-link/master/simmel_demodulator.png)
+
 # Prerequisites
 The Simmel development system assumes you already have an Rpi with the
 appropriate adapter installed, and openocd compiled with BCM2835
