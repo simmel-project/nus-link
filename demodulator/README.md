@@ -62,9 +62,11 @@ of a local oscillator.
 The block diagram image is repeated here for viewing convenience. Here
 is the path a sample takes from microphone to demodulated data:
 
-`i2s.c` sets up the I2S block (see Technical Note below) to record samples;
-`I2S_IRQHandler()` manages this, and sets `i2s_ready` every time the 4kiB sample buffer
-goes full.
+`i2s.c` sets up the I2S block (see Technical Note below) to record
+samples; `I2S_IRQHandler()` manages this, and sets `i2s_ready` every
+time 2kiB of the double-buffered 4kiB sample buffer goes full. If
+porting to another platform, this is probably the right API level to
+divide the HAL from the demodulator loop implementation.
 
 The main loop, `main.c/background_tasks()`, waits for `i2s_ready` to
 be set by the interrupt handler. Once it is set, it will call
@@ -79,20 +81,23 @@ native filter batch size).
 2. An AGC algorithm is run to normalize the input amplitude to the loop
 3. The samples are split into I/Q arms by multiplying to the I/Q outputs of an NCO (numerically controlled oscillator)
 4. The I/Q arms are low-pass filtered to remove the carrier
-5. The arms are multiplied, and then filtered again to stabilize the loop. The error signal is then reduced through a "gain" block (in this case, not amplifying up, but multiplying by a fractional value to reduce the amplitude) and fed into the NCO's phase accumulation variable.
-6. The "Q" arm is then sent to a slicer which applies hysteresis and timing algorithms to extract raw `1`/`0` symbols that are then piped to a Varicode decoder
+5. The arms are multiplied, and then filtered again to stabilize the loop. The error signal is then reduced through a "gain" block (-1.0 < gain < 0.0) and fed into the NCO's phase accumulation variable.
+6. The "I" arm is then sent to a slicer which applies hysteresis and timing algorithms to extract raw `1`/`0` symbols that are then piped to a Varicode decoder
 
 All of the filtering and math is done using the ARM CMSIS DSP library
 (found in `src/cmsis/source`), which providese efficient primitives
 for multiplication, IIR, FIR, and so forth using `f32` format, taking
 advantage of the Cortex-M4's floating point DSP
-instructions. Significantly, there is a `blockSize` parameter required
-across all the DSP primitives. A larger `blockSize` primitive makes
-the DSP operations more efficient, because the loops can be unrolled,
-but it also introduces a big problem in feedback loops, that is, extra
-phase lag: loop results are delayed by the length of the `blockSize`
-parameter, and thus it subtracts phase margin from the feedback look,
-making it unstable.
+instructions.
+
+Significantly, there is a `blockSize` parameter (encoded as
+`SAMPLES_PER_PERIOD` in `demod.c`) required across all the DSP
+primitives. A larger `blockSize` primitive makes the DSP operations
+more efficient, because the loops can be unrolled, but it also
+introduces a big problem in feedback loops, that is, extra phase lag:
+loop results are delayed by the length of the `blockSize` parameter,
+and thus it subtracts phase margin from the feedback look, making it
+unstable.
 
 With a 64MHz Cortex-M4, a bit over half the CPU power is required to
 implement the system using FIR filters with about 7 taps, and a
@@ -107,7 +112,22 @@ just 1 or 2 stages, but they suffer from numerical instability at
 extreme cutoff values, and they introduce phase variations or gain
 variations depending upon the form of the IIR filter (FIR filters, on
 the other hand, can provide linear phase response and flat pass
-bands).
+bands). However, they allow the `blockSize` to be set to 2, which
+keeps the amount of phase shift introduced into the loop to an
+acceptable level for loop stability.
+
+The v1 implementation uses the following parameters for the demodulator:
+
+* The input HPF is an order-1 Bessel, with a passband of 15833Hz
+* The AGC step is 0.005, with an amplitude convergence target of 0.2 - 0.35.
+* The I/Q LPF filters are order-2 Butterworth, with a passband below 976Hz
+* The loop LPF is omitted, and the gain is -0.05
+
+The loop LPF is omitted in part due to computational limitations;
+including it causes the loop to occassionally miss its computational
+deadline. It feels like this might be due to a floating point exception
+condition not being handled gracefully, but it is left as an open issue,
+as the loop performs acceptable without the additional LPF.
 
 ## Technical Note: NRF52 Incompatibility with ICS-43434 Microphone
 
@@ -123,6 +143,12 @@ Thus, we cannot draw LRCLK directly from the NRF52's I2S block. Instead,
 we dump the MCLK and LRCLK signals to unused pins. We tap SCLK directly
 to the ICS-43434 and configure PWM0 to generate the LRCLK.
 
-Then we "trick" the NRF52's I2S block and tell it that we are using
-16 bits per sample, back-to-back, in stereo mode, but we generate
-an LRCLK from the PWM0 module that toggles once every 32 samples. 
+Then we "trick" the NRF52's I2S block and tell it that we are using 16
+bits per sample, back-to-back, in stereo mode, but we generate an
+LRCLK from the PWM0 module that toggles once every 32 samples.  The
+resulting stream of data from the NRF's I2S block is thus [LN, RN,
+LN+1, RN+1], where LN is the actual sample of interest, and RN, LN+1,
+and RN+1 are garbage: the RN is the zero-pad on the microphone's
+channel, and the "N+1" samples are sampling the 32-bits off-phase from
+the microphone's channel.
+

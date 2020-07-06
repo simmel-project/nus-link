@@ -390,7 +390,7 @@ void bpsk_demod_init(void) {
 			     bpsk_state.iir_bpf_state, SAMPLES_PER_PERIOD);
 #endif
 
-    bpsk_state.gain = 0.05f * TWO_PI;
+    bpsk_state.gain = -0.05f * TWO_PI;
 #if LOOP_TYPE == LOOP_FILT
     arm_iir_lattice_init_f32(&bpsk_state.loop_filt, LOOPSTAGES, loop_reflection_coeff, loop_ladder_coeff,
 			     bpsk_state.loop_filt_state, SAMPLES_PER_PERIOD);
@@ -554,7 +554,7 @@ static void bpsk_core(void) {
         avg += errorwindow[i];
     }
     avg /= ((float32_t)SAMPLES_PER_PERIOD);
-    bpsk_state.nco.error = -(avg) * bpsk_state.gain;
+    bpsk_state.nco.error = (avg) * bpsk_state.gain;
     // printf("err: %0.04f\n", bpsk_state.nco.error);
 #elif LOOP_TYPE == LOOP_FILT
     arm_iir_lattice_f32(&bpsk_state.loop_filt, errorwindow, bpsk_state.loopfilt, SAMPLES_PER_PERIOD);
@@ -575,12 +575,9 @@ static void bpsk_core(void) {
     //  right_channel[i] = (q15_t) __SSAT((q31_t) (bpsk_state.nco.error * 32768.0f), 16);
     //}
     
-	float32_t *decode_arm;
-#if LOOP_TYPE == LOOP_AVG
-	decode_arm = bpsk_state.i_lpf_samples;
-#else
-	decode_arm = bpsk_state.q_lpf_samples;
-#endif
+    float32_t *decode_arm;
+    decode_arm = bpsk_state.i_lpf_samples;
+    
     arm_float_to_q15(decode_arm, left_channel, SAMPLES_PER_PERIOD);
     //arm_float_to_q15(bpsk_state.q_lpf_samples, left_channel, SAMPLES_PER_PERIOD);
 
@@ -708,11 +705,8 @@ int bpsk_demod(uint32_t *bit, demod_sample_t *samples, uint32_t nb,
 
 	int state;
 	float32_t *decode_arm;
-#if LOOP_TYPE == LOOP_AVG
 	decode_arm = bpsk_state.i_lpf_samples;
-#else
-	decode_arm = bpsk_state.q_lpf_samples;
-#endif
+
 	if( bpsk_state.last_state == 0 ) {
 	  if( decode_arm[bpsk_state.current_offset] > HYSTERESIS )
 	    state = 1;
