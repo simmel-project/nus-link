@@ -1,26 +1,27 @@
 # Near Ultrasound (NUS) Link Test
 
-This repository contains the instructions to build and set up a NUS link test using
-the Simmel platform. It also documents the theory behind the NUS link.
+This repository contains the instructions to build and set up a NUS
+link test using the Simmel platform. It also documents the theory
+behind the NUS link.
 
-Let's get this out of the way: we believe NUS as a technology for
-contact tracing is not a good idea, because of the physics of
-ultrasound. Ultrasound is fairly directional (which is why bats can
-use it to navigate in the dark), and does not penetrate through
-fabrics well. At best, NUS would be awkward for users, requiring
-them to wear beacons in prominent locations that are hard to block,
-such as a lanyard around their neck. 
+NUS as a technology for contact tracing is not a good idea, because of
+the physics of ultrasound. Ultrasound is fairly directional (which is
+why bats can use it to navigate in the dark), and does not penetrate
+through fabrics well. At best, NUS would be awkward for users,
+requiring them to wear beacons in prominent locations that are hard to
+block, such as a lanyard around their neck.
 
 However, the potential privacy (due to its limited range) and power
 benefits (due to the simplicity of the receiver) of NUS were
 compelling enough that we were obligated to investigate the technology
 further.
 
-This link test represents the culmination of our research. While our
-findings generally support our initial assertion that NUS is not a
-great technology for contact tracing, it is, however, potentially
-quite useful for a number of other free-space, short-range, low-power,
-cheap, and entirely open source communication links.
+This "link test" repository represents the culmination of our
+research. While our findings generally support our initial assertion
+that NUS is not a great technology for contact tracing, it is,
+however, potentially quite useful for a number of other free-space,
+short-range, low-power, cheap, and entirely open source communication
+links.
 
 Therefore, please regard the remainder of this README as breadcrumbs
 for anyone who is looking for an open source reference design for a
@@ -167,6 +168,15 @@ transmitter also cut the link.
 The images above show both the demodulator output, as well as the raw
 waveform going in. The NUS signal is visibly attenuated compared to
 the background music playing concurrently with the test.
+
+A third test was conducted to demonstrate that NUS is unable to
+penetrate human bodies. The reciever was placed, once again, 80cm from
+the transmitter, and optimally oriented. A human test subject then
+stood in front of the transmitter, simulating a situation where the
+transmitter maybe carried in e.g. the back pocket of a user. The link
+was immediately lost when the user stood in front of the transmitter,
+and the resulting waveform is similar to the case of the 1.5mm linen
+sack.
 
 ## Power
 
