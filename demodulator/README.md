@@ -31,7 +31,9 @@ the same directory level as each other. This is because `openocd` runs
 with a path relative to the directory it was started in (which is
 `simmel-scripts`), but the code you wan to load is in `nus-link`, and
 therefore the convenience scripts go up one directory and down into
-`nus-link` to find the `_build` directory.
+`nus-link` to find the `_build` directory. If you change the name of
+`nus-link` or its position relative to `simmel-scripts`, the relative
+paths will break.
 
 You will also need to follow the directions within the
 `simmel-scripts` repo to load the nrf52 "softdevice" firmware before
