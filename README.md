@@ -139,6 +139,44 @@ The top trace is the demodulated data, and the bottom trace is the raw incoming 
 to be viewable (without normalization, you would just see a flat line because the incoming amplitude is
 actually quite small).
 
+![directionality](https://raw.githubusercontent.com/simmel-project/nus-link/master/media/simmel_demod_directionality.png)
+
+To very grossly characterize the directionality of the transmitter, a
+transmitter was fixed to a post 80cm from the receiver, and rotated in
+45-degree increments. The peak emission strength is through the PCB
+(through the bottom of the transducer), and the weakest emission is
+from the top of the transducer.
+
+Within about +/-45 degrees off the line of optimal power, decode performance
+is subjectively good. However, past 90 degrees off optimal, the demodulator
+is unable to achieve a lock on the signal.
+
+![attenuation](https://raw.githubusercontent.com/simmel-project/nus-link/master/media/simmel_demod_cloth.png)
+
+The same setup as above was used to get an idea of the impact of cloth,
+such as if the device were put in someone's pocket or handbag. The transmitter
+was fixed 80cm from the receiver, with the transmitter directly pointed at the
+receiver for optimal link performance. Link performance is clearly degraded
+when about ~1mm thick cloth is put over the receiver or transmitter. In the
+case of the receiver, a microfiber cloth was draped over the receiver and folded
+until the link was no longer working. The cloth itself is quite thin, about 0.3mm;
+two folds (total thickness 1.2mm) would cause the link to cease operation. Likewise,
+about a 1.5mm thick linen sack (a typical thickness for a hand bag) put over the
+transmitter also cut the link. 
+
+The images above show both the demodulator output, as well as the raw
+waveform going in. The NUS signal is visibly attenuated compared to
+the background music playing concurrently with the test.
+
+## Power
+
+Both the Tx and Rx Simmel devices show a draw of 8mA at 3.0V running
+100% duty cycle modulator and demodulator loops. No attempts were done
+at power optimization; however, the computational complexity of the
+demodulator seems to push the NRF52's CPU to its limit, burning about
+4-5mA to do the demodulation. Simplifying the computational loop can
+reduce power consumption, by allowing the CPU to idle.
+
 # Prerequisites
 The Simmel development system assumes you already have an Rpi with the
 appropriate adapter installed, and openocd compiled with BCM2835
