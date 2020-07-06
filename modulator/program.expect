@@ -1,7 +1,7 @@
 spawn telnet localhost 4444
 expect "Open On-Chip Debugger"
 
-send "program ../playground/_build/nus-test-nosd.elf\r"
+send "program ../nus-link/modulator/_build/nus-test-nosd.elf\r"
 expect "Programming Finished"
 
 send "reset\r"

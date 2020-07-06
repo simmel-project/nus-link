@@ -53,8 +53,63 @@ a format like this:
 
 ## Technical Description
 
+The demodulator is a [Costas Loop](https://en.wikipedia.org/wiki/Costas_loop).
+It is a coherent detector, which means we do phase recovery and synchronization
+of a local oscillator.
 
-## Trick #2: NRF52 Incompatibility with ICS-43434 Microphone
+![demodulator block diagram](https://raw.githubusercontent.com/simmel-project/nus-link/master/simmel_demodulator.png)
+
+The block diagram image is repeated here for viewing convenience. Here
+is the path a sample takes from microphone to demodulated data:
+
+`i2s.c` sets up the I2S block (see Technical Note below) to record samples;
+`I2S_IRQHandler()` manages this, and sets `i2s_ready` every time the 4kiB sample buffer
+goes full.
+
+The main loop, `main.c/background_tasks()`, waits for `i2s_ready` to
+be set by the interrupt handler. Once it is set, it will call
+`bpsk.c/bpsk_run()` which in turn calls `bpsk/demod.c/bpsk_demod()`
+and finally `bpsk/demod.c/bpsk_core()` (the various layers manage
+real-time character printing, buffering, and sample slicing to the
+native filter batch size).
+
+`bpsk_core()` is where the DSP pipe is defined:
+
+1. Incoming data is put through a high pass filter, to remove low frequency interfece
+2. An AGC algorithm is run to normalize the input amplitude to the loop
+3. The samples are split into I/Q arms by multiplying to the I/Q outputs of an NCO (numerically controlled oscillator)
+4. The I/Q arms are low-pass filtered to remove the carrier
+5. The arms are multiplied, and then filtered again to stabilize the loop. The error signal is then reduced through a "gain" block (in this case, not amplifying up, but multiplying by a fractional value to reduce the amplitude) and fed into the NCO's phase accumulation variable.
+6. The "Q" arm is then sent to a slicer which applies hysteresis and timing algorithms to extract raw `1`/`0` symbols that are then piped to a Varicode decoder
+
+All of the filtering and math is done using the ARM CMSIS DSP library
+(found in `src/cmsis/source`), which providese efficient primitives
+for multiplication, IIR, FIR, and so forth using `f32` format, taking
+advantage of the Cortex-M4's floating point DSP
+instructions. Significantly, there is a `blockSize` parameter required
+across all the DSP primitives. A larger `blockSize` primitive makes
+the DSP operations more efficient, because the loops can be unrolled,
+but it also introduces a big problem in feedback loops, that is, extra
+phase lag: loop results are delayed by the length of the `blockSize`
+parameter, and thus it subtracts phase margin from the feedback look,
+making it unstable.
+
+With a 64MHz Cortex-M4, a bit over half the CPU power is required to
+implement the system using FIR filters with about 7 taps, and a
+`blockSize` of 20. Unfortunately this `blockSize` is quite large
+compared to the feedback loop closure rate, and we can only do a gross
+"averaging" of the error signal; there isn't enough processing power
+to implement a FIR with enough taps to get to a low enough frequency
+to meaningfully filter the error signal.
+
+Thus, the loop uses IIR filters. These are more compact, requiring
+just 1 or 2 stages, but they suffer from numerical instability at
+extreme cutoff values, and they introduce phase variations or gain
+variations depending upon the form of the IIR filter (FIR filters, on
+the other hand, can provide linear phase response and flat pass
+bands).
+
+## Technical Note: NRF52 Incompatibility with ICS-43434 Microphone
 
 The NRF52 only supports I2S with frames up to 24 bits in length.
 
