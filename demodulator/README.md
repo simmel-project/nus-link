@@ -129,7 +129,7 @@ deadline. It feels like this might be due to a floating point exception
 condition not being handled gracefully, but it is left as an open issue,
 as the loop performs acceptable without the additional LPF.
 
-## Technical Note: NRF52 Incompatibility with ICS-43434 Microphone
+## Thar Be Dragons: NRF52 Incompatibility with ICS-43434 Microphone
 
 The NRF52 only supports I2S with frames up to 24 bits in length.
 
@@ -153,5 +153,14 @@ channel, and the "N+1" samples are sampling the 32-bits off-phase from
 the microphone's channel. The re-formatting of data is handled here:
 https://github.com/simmel-project/nus-link/blob/1a45980b6491df3ce41764d623a3204faf09c25c/demodulator/src/main.c#L190
 
-Furthermore, 
+Furthermore, the precise phase of the PWM and I2S blocks depends upon
+the `TASKS_START` bit of the two blocks being set at precisely the right
+time relative to each other. This is handled in the code here:
+https://github.com/simmel-project/nus-link/blob/fd91188eb8d72c78ba306a8d0a8ad81ea91e5013/demodulator/src/i2s.c#L86
+
+Moving around the lines of code, or adding or removing lines in between the
+first and last lines, will break the I2S loop.
+
+Too much magic!
+
 
