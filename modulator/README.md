@@ -40,10 +40,11 @@ The modulator itself is conceptually simple: create a continuous waveform
 at 20833.33Hz. When transitioning from a `0` to a `1`, simply invert the
 waveform, to introduce the desired `pi` phase shift.
 
-The modulator implementation is complicated by the fact that the transducer
-is a piezo element. A piezo element is either `on` or `off`: there is no
-middle state, unlike a speaker which has a voice coil that can be set to
-an arbitrary amplitude.
+The modulator implementation is complicated by the fact that the
+transducer is a piezo element. A piezo element is non-linear, in that
+it is either `on` or `off`: there is no middle state, unlike a speaker
+which has a voice coil that can be set, with great precision, to an
+arbitrary amplitude.
 
 Thus, we can only produce a square wave. At 20.833kHz, a square wave will create
 harmonics, but the harmonics will be higher mulitples and thus inaudible;
@@ -68,7 +69,9 @@ demonstrates the same waveform, but run twice through an Audacity high-pass
 filter with the cutoff set to 20kHz and a 48dB per octaive roll-off. You
 won't hear anything, but the data is still there!
 
-Unfortunately, we have a digital modulator, therefore, we can't play
+## Eliminating Sidebands with a Non-Linear Transducer Element
+
+Unfortunately, we have a non-linear transducer, therefore, we can't play
 this filtering trick. Instead, we use wave-table synthesis to
 gradually lengthen or shorten the period of the carrier. The NRF52
 has a PWM unit which can "easyDMA" a sequence of memory to the PWM
@@ -86,7 +89,7 @@ constant carrier tone).
 Whenever we go from a 0->1, or a 1->0, we need to "steal" or "give" 96
 PWM counts of time to create a `pi` phase shift. The exact mapping of
 steal or give to which transition is actually arbitrary, and is a
-feature of the BPSK and PSK31 coding (in that all you care about is
+feature of the BPSK and Varicode coding (in that all you care about is
 transitions and not the polarity; the demodulator mathematically
 cannot actually say for sure what the polarity is, it can only find
 transitions).
@@ -107,7 +110,7 @@ Thus the overall top-down organization of the modulator is as follows:
 
 1. `modulate_next_sample()` inside `src/modulate.c` contains the state
 machine which fetches characters from the test string, decodes them
-into a PSK31 varcode array, and then determines which bit is to be
+into a PSK31 Varicode array, and then determines which bit is to be
 sent next. 
 1. `modulate_next_sample()` is driven by interrupts coming from
 the `PWM0_IRQHandler` inside `src/i2s.c`. One interrupt fires

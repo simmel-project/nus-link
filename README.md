@@ -61,9 +61,9 @@ in a "bridged" mode for greater acoustic power output.
 
 ### PHY Layer Description
 
-A [BPSK
-modulation](http://www.arrl.org/files/file/Technology/tis/info/pdf/x9907003.pdf)
-scheme with [PSK31
+A PSK31 link using [BPSK
+modulation](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2017/EECS-2017-91.pdf)
+scheme with [Varicode
 encoding](http://www.arrl.org/files/file/Technology/tis/info/pdf/x9907003.pdf)
 is used.
 
@@ -112,7 +112,7 @@ A `1` or `0` symbol is represented by 32 cycles of the 20833Hz
 carrier.  Thus the baud rate is 20833Hz / 32 = 651.0417 symbols per
 second.
 
-The `1` or `0` symbols are then encoded using the variable-rate PSK31
+The `1` or `0` symbols are then encoded using the variable-rate Varicode
 encoding, which means the actual character rate of e.g. ASCII text
 varies depending upon the character.
 
