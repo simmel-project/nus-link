@@ -79,11 +79,15 @@ void nus_start(void) {
     // Turn on the interrupt to the NVIC but not within the NVIC itself. This
     // will wake the CPU and keep it awake until it is serviced without
     // triggering an interrupt handler.
+
+    // NOTE: the ordering of the next four lines of code must not be altered.
+    // This relative timing of the first and last line of this block sets the
+    // phase of the LRCLK relative to the I2S sampling loop!
     NRF_PWM0->TASKS_SEQSTART[0] = 1;
     NRF_I2S->INTENSET = I2S_INTENSET_RXPTRUPD_Msk;
     NRF_I2S->ENABLE = I2S_ENABLE_ENABLE_Enabled;
-
     NRF_I2S->TASKS_START = 1;
+    
     return;
 }
 

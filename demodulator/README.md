@@ -150,5 +150,8 @@ resulting stream of data from the NRF's I2S block is thus [LN, RN,
 LN+1, RN+1], where LN is the actual sample of interest, and RN, LN+1,
 and RN+1 are garbage: the RN is the zero-pad on the microphone's
 channel, and the "N+1" samples are sampling the 32-bits off-phase from
-the microphone's channel.
+the microphone's channel. The re-formatting of data is handled here:
+https://github.com/simmel-project/nus-link/blob/1a45980b6491df3ce41764d623a3204faf09c25c/demodulator/src/main.c#L190
+
+Furthermore, 
 
