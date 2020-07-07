@@ -150,7 +150,7 @@ as the loop performs acceptable without the additional LPF.
 The NRF52 only supports I2S with frames up to 24 bits in length.
 
 The ICS-43434 requires a 32-bit length stereo LRCLK frame, returinng
-mono 16-bit samples. Seems weird, but the extra dummy clocks are
+mono sign-extended 24-bit samples. Seems weird, but the extra dummy clocks are
 probably used by the internal digital filters on the ICS-43434:
 attempts to shorten the frame length results in highly degraded
 performance.
@@ -162,11 +162,11 @@ to the ICS-43434 and configure PWM0 to generate the LRCLK.
 Then we "trick" the NRF52's I2S block and tell it that we are using 16
 bits per sample, back-to-back, in stereo mode, but we generate an
 LRCLK from the PWM0 module that toggles once every 32 samples.  The
-resulting stream of data from the NRF's I2S block is thus [LN, RN,
-LN+1, RN+1], where LN is the actual sample of interest, and RN, LN+1,
-and RN+1 are garbage: the RN is the zero-pad on the microphone's
-channel, and the "N+1" samples are sampling the 32-bits off-phase from
-the microphone's channel. The re-formatting of data is handled here:
+resulting stream of data from the NRF's I2S block is thus [LNL, LNH, RNL,
+RNH, LNL+1, LNH+1, RNL+1, RNH+1], where LNL and LNH are the low and high halfwords of
+the actual sample of interest, and RNL and RNH are garbage sampling the 32-bits off-phase from
+the microphone's channel. The re-formatting of data to swap and combine LNL and LNH
+and ignore RNL and RNH is handled here:
 https://github.com/simmel-project/nus-link/blob/1a45980b6491df3ce41764d623a3204faf09c25c/demodulator/src/main.c#L190
 
 Furthermore, the precise phase of the PWM and I2S blocks depends upon
