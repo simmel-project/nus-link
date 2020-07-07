@@ -104,11 +104,11 @@ which is further divided by 64 (32 clocks for each of "left" and
 "right") to derive the base sampling rate of the ICS-43434. Note that
 the ICS-43434 *requires* a 32-clock sample period with stereo framing
 for proper operation, due to the way its internal digital filters are
-set up, even though we only recover 16 bits of data on a mono
+set up, even though we data on a mono
 channel. Also note that 32-clock sample periods are acutally not
 directly supported by the NRF52833 hardware; we emulate the LRCLK
 using a phase-locked PWM signal mapped to the pin (more details in the
-demodulator README).
+demodulator README) and perform byteswapping in software.
 
 A `1` or `0` symbol is represented by 32 cycles of the 20833Hz
 carrier.  Thus the baud rate is 20833Hz / 32 = 651.0417 symbols per
