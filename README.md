@@ -38,7 +38,7 @@ is also a 64-MHz Cortex-M4 with floating point ad DSP instructions.
 We take advantage of these three features (I2S, PWM,
 FP/DSP instructions) to create a near-ultrasound (NUS) link using a
 [Murata PKMCS0909E4000-R1](https://www.murata.com/en-us/api/pdfdownloadapi?cate=&partno=PKMCS0909E4000-R1)
-iezo buzzer and a [TDK Invensense ICS-43434](https://invensense.tdk.com/products/ics-43434/)
+piezo buzzer and a [TDK Invensense ICS-43434](https://invensense.tdk.com/products/ics-43434/)
 direct-to-digital microphone.
 
 The carrier frequency is 20.8333 kHz; this is above the threshold of
